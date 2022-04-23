@@ -1,12 +1,14 @@
 const Koa = require('koa');
-const static = require('koa-static');
+const serveStaticPlugin = require('./serveStaticPlugin');
+const moduleRewritePlugin = require('./moduleRewritePlugin');
 
 function createServer() {
   const app = new Koa();
   const root = process.cwd();
   const context = { app, root };
-  // 1.静态文件服务
-  app.use(static(root));
+
+  // 内部使用app.use注册中间件
+  [moduleRewritePlugin, serveStaticPlugin].forEach((plugin) => plugin(context));
 
   return app;
 }
