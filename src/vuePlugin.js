@@ -13,8 +13,31 @@ function vuePlugin({ root, app }) {
     const filePath = path.join(root, ctx.path);
     const { descriptor } = await getDescriptor(filePath);
 
+    // url参数type是style说明是样式文件，通过脚本方式插入head中
+    if (ctx.query.type === 'style') {
+      // 处理样式
+      ctx.type = 'js';
+      const block = descriptor.styles[ctx.query.index];
+      ctx.body = `
+        let style = document.createElement('style');
+        style.innerHTML = ${JSON.stringify(block.content)};
+        document.head.appendChild(style);
+      `;
+      return;
+    }
+
     // 组装代码
     let targetCode = '';
+
+    // 处理样式，在返回的vue文件中插入引入样式的语句
+    if (descriptor.styles.length > 0) {
+      let styleCodes = '';
+      descriptor.styles.forEach((style, index) => {
+        const styleRequest = `${ctx.path}?vue&type=style&index=${index}&lang.css`;
+        styleCodes += `\nimport ${JSON.stringify(styleRequest)}`;
+      });
+      targetCode += styleCodes;
+    }
 
     // 处理脚本
     if (descriptor.script) {
