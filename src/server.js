@@ -2,6 +2,7 @@ const Koa = require('koa');
 const serveStaticPlugin = require('./serveStaticPlugin');
 const moduleRewritePlugin = require('./moduleRewritePlugin');
 const moduleResolvePlugin = require('./moduleResolvePlugin');
+const vuePlugin = require('./vuePlugin');
 
 function createServer() {
   const app = new Koa();
@@ -9,7 +10,7 @@ function createServer() {
   const context = { app, root };
 
   // 内部使用app.use注册中间件
-  [moduleRewritePlugin, moduleResolvePlugin, serveStaticPlugin].forEach((plugin) => plugin(context));
+  [moduleRewritePlugin, moduleResolvePlugin, vuePlugin, serveStaticPlugin].forEach((plugin) => plugin(context));
 
   return app;
 }
